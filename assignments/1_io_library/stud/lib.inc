@@ -2,14 +2,33 @@ section .text
 
 string_length:
     xor rax, rax
+    .loop:
+    cmp byte [rdi+rax], 0
+    je .loop_end
+    inc rax
+    jmp .loop
+    .loop_end:
     ret
 
 print_string:
-    xor rax, rax
+    push rdi
+    call string_length
+    pop rsi
+    mov rdx, rax
+    mov rax, 1
+    mov rdi, 1
+    syscall
     ret
 
-
 print_char:
+    ; rdi, rsi, rdx
+    push rdi
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    mov rsi, rsp
+    syscall
+    inc rsp
     xor rax, rax
     ret
 
@@ -53,4 +72,30 @@ parse_int:
 
 
 string_copy:
+    push rdi
+    push rsi
+    push rdx
+    call string_length
+    pop rdx
+    pop rsi
+    pop rdi
+    cmp rax, rdx
+    jae .error ; rax >= rdx
+
+    xor rcx, rcx
+    push rbx
+    .loop:
+    cmp rcx, rdx
+    ja .end ; rcx > rdx
+    mov bl, byte [rdi+rcx]
+    mov byte [rsi+rcx], bl
+    inc rcx
+    jmp .loop
+
+    .end:
+    pop rbx
+    mov rax, rsi
+    ret
+    .error:
+    xor rax, rax
     ret
