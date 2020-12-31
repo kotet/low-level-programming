@@ -38,7 +38,25 @@ print_newline:
 
 
 print_uint:
-    xor rax, rax
+    mov rax, rdi
+    mov rdi, rsp
+    dec rdi
+    push 0 ; 8バイトの領域を0埋め
+    sub rsp, 16
+    mov r8, 10
+
+    .loop:
+    xor rdx, rdx
+    idiv r8
+    or rdx, 0x30
+    dec rdi
+    mov byte [rdi], dl
+    test rax, rax
+    jnz .loop
+
+    call print_string
+
+    add rsp, 24
     ret
 
 
