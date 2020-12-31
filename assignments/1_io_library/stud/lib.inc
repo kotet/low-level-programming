@@ -23,13 +23,9 @@ print_string:
 print_char:
     ; rdi, rsi, rdx
     push rdi
-    mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
-    mov rsi, rsp
-    syscall
-    inc rsp
-    xor rax, rax
+    mov rdi, rsp
+    call print_string
+    pop rdi
     ret
 
 print_newline:
@@ -39,10 +35,13 @@ print_newline:
 
 print_uint:
     mov rax, rdi
+
     mov rdi, rsp
     dec rdi
+
     push 0 ; 8バイトの領域を0埋め
     sub rsp, 16
+
     mov r8, 10
 
     .loop:
@@ -61,8 +60,15 @@ print_uint:
 
 
 print_int:
-    xor rax, rax
-    ret
+    test rdi, rdi
+    jns print_uint
+    push rdi
+    mov rdi, '-'
+    call print_char
+    pop rdi
+    neg rdi
+    jmp print_uint
+    
 
 string_equals:
     xor rax, rax
@@ -70,7 +76,17 @@ string_equals:
 
 
 read_char:
-    xor rax, rax
+    dec rsp ; バッファを確保
+    xor rax, rax ; 0 (read)
+    xor rdi, rdi ; 0 (stdin)
+    mov rsi, rsp
+    mov rdx, 1 ; 1 byte
+    syscall
+    test rax, rax
+    jz .end
+    mov al, byte [rsp]
+    .end:
+    inc rsp
     ret 
 
 read_word:
