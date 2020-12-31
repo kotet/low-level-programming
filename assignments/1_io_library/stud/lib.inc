@@ -29,8 +29,8 @@ print_char:
     ret
 
 print_newline:
-    xor rax, rax
-    ret
+    mov rdi, '\n'
+    jmp print_char
 
 
 print_uint:
@@ -68,6 +68,19 @@ print_int:
     
 
 string_equals:
+    movzx r8, byte [rdi]
+    movzx r9, byte [rsi]
+    cmp r8, r9
+    jne .false
+    cmp r8, 0
+    je .true
+    inc rdi
+    inc rsi
+    jmp string_equals
+    .true:
+    mov rax, 1
+    ret
+    .false:
     xor rax, rax
     ret
 
