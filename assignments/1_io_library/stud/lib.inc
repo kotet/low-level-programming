@@ -144,14 +144,38 @@ read_word: ; (char* ptr, int len)
 ; rdi points to a string
 ; returns rax: number, rdx : length
 parse_uint:
+    mov r8, 10
     xor rax, rax
+    xor rcx, rcx
+    .loop:
+    movzx r9, byte [rdi + rcx]
+    cmp r9b, '0'
+    jb .end
+    cmp r9b, '9'
+    ja .end
+    xor rdx, rdx
+    mul r8
+    sub r9, '0'
+    add rax, r9
+    inc rcx
+    jmp .loop
+    .end:
+    mov rdx, rcx
     ret
 
 ; rdi points to a string
 ; returns rax: number, rdx : length
 parse_int:
-    xor rax, rax
-    ret 
+    movzx r8, byte[rdi]
+    cmp r8, '-'
+    je .neg
+    jmp parse_uint
+    .neg:
+    inc rdi
+    call parse_uint
+    inc rdx
+    neg rax
+    ret
 
 
 string_copy:
