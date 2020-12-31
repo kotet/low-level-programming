@@ -35,13 +35,10 @@ print_newline:
 
 print_uint:
     mov rax, rdi
-
     mov rdi, rsp
     dec rdi
-
     push 0 ; 8バイトの領域を0埋め
     sub rsp, 16
-
     mov r8, 10
 
     .loop:
@@ -89,7 +86,59 @@ read_char:
     inc rsp
     ret 
 
-read_word:
+read_word: ; (char* ptr, int len)
+    xor rdx, rdx
+
+    .skip_spaces:
+    push rdi
+    push rsi
+    push rdx
+    call read_char
+    pop rdx
+    pop rsi
+    pop rdi
+    cmp al, 0x20
+    je .skip_spaces
+    cmp al, 0x09
+    je .skip_spaces
+    cmp al, 0x0A
+    je .skip_spaces
+    cmp al, 0x0D
+    je .skip_spaces
+    test al, al
+    jz .success
+
+    .read_word:
+    mov byte [rdi + rdx], al
+    inc rdx
+    push rdi
+    push rsi
+    push rdx
+    call read_char
+    pop rdx
+    pop rsi
+    pop rdi
+    cmp al, 0x20
+    je .success
+    cmp al, 0x09
+    je .success
+    cmp al, 0x0A
+    je .success
+    cmp al, 0x0D
+    je .success
+    test al, al
+    jz .success
+    cmp rdx, rsi
+    je .error
+    jmp .read_word
+
+    .success:
+    mov byte [rdi + rdx], 0
+    mov rax, rdi
+    ret
+
+    .error:
+    xor rax, rax
     ret
 
 ; rdi points to a string
